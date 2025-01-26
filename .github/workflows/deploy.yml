@@ -29,11 +29,6 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -t rsa 100.127.34.10 >> ~/.ssh/known_hosts || echo "SSH keyscan failed, but continuing"
 
-    - name: Set up Kubeconfig
-      run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-
     - name: SSH into the VM and apply deployment
       run: |
         ssh -o StrictHostKeyChecking=no admink8s@100.127.34.10 << 'EOF'
