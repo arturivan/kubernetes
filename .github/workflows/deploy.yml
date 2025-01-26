@@ -20,6 +20,11 @@ jobs:
       with:
         authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
 
+    - name: Check Tailscale connection
+      run: |
+        tailscale status
+        ping -c 4 172.21.151.213 # Kubernetes server IP
+
     # Step 3: Install kubectl
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
