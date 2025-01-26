@@ -23,7 +23,7 @@ jobs:
     - name: Check Tailscale connection
       run: |
         tailscale status
-        ping -c 4 100.79.137.77 # Kubernetes server IP
+        ping -c 4 100.98.59.89 # Kubernetes server IP
 
     # Step 3: Install kubectl
     - name: Install kubectl
