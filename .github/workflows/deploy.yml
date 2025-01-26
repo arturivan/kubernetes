@@ -29,11 +29,16 @@ jobs:
         mkdir -p ~/.ssh
         ssh-keyscan -t rsa 100.127.34.10 >> ~/.ssh/known_hosts || echo "SSH keyscan failed, but continuing"
 
+    - name: List repository contents for debugging
+      run: |
+        ls -la
+
     - name: SSH into the VM and apply deployment
       run: |
         ssh -o StrictHostKeyChecking=no admink8s@100.127.34.10 << 'EOF'
           kubectl apply -f deployment.yaml || echo "Failed to apply deployment.yaml"
         EOF
+
 
 
 
