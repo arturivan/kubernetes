@@ -35,7 +35,6 @@ jobs:
     # Step 5: Ensure kubectl context is set
     - name: Set kubectl context
       run: |
-        kubectl config use-context rke2 || echo "No context set, checking available contexts."
         kubectl config get-contexts
 
     # Step 6: Verify kubectl configuration
