@@ -35,6 +35,7 @@ jobs:
     # Step 5: Ensure kubectl context is set
     - name: Set kubectl context
       run: |
+        kubectl config use-context rke2 || echo "No context set, checking available contexts."
         kubectl config get-contexts
 
     # Step 6: Verify kubectl configuration
@@ -70,6 +71,7 @@ jobs:
     - name: Deploy to Kubernetes
       run: |
         kubectl apply -f deployment.yaml || echo "Failed to apply deployment.yaml"
+
 
 
 
