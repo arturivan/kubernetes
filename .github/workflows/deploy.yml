@@ -1,5 +1,4 @@
-name: Kubernetes Debug Pipeline
-
+name: Deploy to Kubernetes
 on:
   push:
     branches:
@@ -8,74 +7,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Setup Tailscale to connect to the internal Kubernetes cluster
-    - name: Setup Tailscale
-      uses: tailscale/github-action@v2
-      with:
-        authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
-
-    - name: Check Tailscale connection
-      run: |
-        tailscale status
-        ping -c 4 100.75.127.63 # Kubernetes server IP
-
-    # Step 3: Install kubectl
     - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: v1.26.0
-
-    # Step 4: Configure kubectl using the kubeconfig stored in secrets
-    - name: Configure kubectl
       run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        sudo apt-get update
+        sudo apt-get install -y kubectl
 
-    # Step 5: Ensure kubectl context is set
-    - name: Set kubectl context
-      run: |
-        kubectl config use-context rke2 || echo "No context set, checking available contexts."
-        kubectl config get-contexts
-
-    # Step 6: Verify kubectl configuration
-    - name: Display kubectl config
-      run: kubectl config view --minify
-
-    # Step 7: Verify current kubectl context
-    - name: Verify current kubectl context
-      run: kubectl config current-context
-
-    # Step 8: Check if the Kubernetes API server is accessible
-    - name: Test Kubernetes API server accessibility
-      run: |
-        kubectl cluster-info || echo "Failed to connect to the Kubernetes API server"
-
-    # Step 9: Check kubectl version to confirm it's working
-    - name: Verify kubectl version
-      run: kubectl version --client
-
-    # Step 10: Get the nodes in the cluster (to confirm cluster health)
-    - name: List cluster nodes
-      run: kubectl get nodes || echo "Failed to get nodes in the cluster"
-
-    # Step 11: List available deployments in the default namespace (confirm deployment access)
-    - name: List deployments
-      run: kubectl get deployments || echo "Failed to get deployments"
-
-    # Step 12: Check Kubernetes namespaces (optional check to confirm permissions)
-    - name: List namespaces
-      run: kubectl get namespaces || echo "Failed to get namespaces"
-
-    # Step 13: Deploy to Kubernetes
     - name: Deploy to Kubernetes
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
       run: |
-        kubectl apply -f deployment.yaml || echo "Failed to apply deployment.yaml"
+        kubectl get nodes
+        kubectl apply -f deployment.yaml
+
 
 
 
