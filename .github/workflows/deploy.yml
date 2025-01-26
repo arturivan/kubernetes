@@ -1,4 +1,4 @@
-name: Deploy to RKE2 Cluster
+name: Deploy to RKE2 Cluster k8s
 
 on:
   push:
