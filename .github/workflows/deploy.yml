@@ -30,7 +30,7 @@ jobs:
     - name: Configure kubectl
       run: |
         mkdir -p ~/.kube
-        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+        echo "${{ secrets.KUBE_CONFIG }}" | > ~/.kube/config
 
     # Step 5: Ensure kubectl context is set
     - name: Set kubectl context
