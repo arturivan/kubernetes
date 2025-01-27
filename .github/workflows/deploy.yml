@@ -1,4 +1,4 @@
-name: Deploy to RKE2
+name: Kubernetes Debug Pipeline
 
 on:
   push:
@@ -8,28 +8,74 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Code
+      # Step 1: Checkout the code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Tailscale
-        run: |
-          curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }}
+      # Step 2: Setup Tailscale to connect to the internal Kubernetes cluster
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
 
-      - name: Set up kubeconfig
+      - name: Check Tailscale connection
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-          export KUBECONFIG=$PWD/kubeconfig
+          tailscale status
+          ping -c 4 100.127.34.10 # Kubernetes server IP
 
+      # Step 3: Install kubectl
       - name: Install kubectl
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          sudo mv kubectl /usr/local/bin/
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.26.0
 
-      - name: Deploy to RKE2
-        run: kubectl apply -f deployment.yaml --validate=false
+      # Step 4: Configure kubectl using the kubeconfig stored in secrets
+      - name: Configure kubectl
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+
+      # Step 5: Ensure kubectl context is set
+      - name: Set kubectl context
+        run: |
+          kubectl config use-context default || echo "No context set, checking available contexts."
+          kubectl config get-contexts
+
+      # Step 6: Verify kubectl configuration
+      - name: Display kubectl config
+        run: kubectl config view --minify
+
+      # Step 7: Verify current kubectl context
+      - name: Verify current kubectl context
+        run: kubectl config current-context
+
+      # Step 8: Check if the Kubernetes API server is accessible
+      - name: Test Kubernetes API server accessibility
+        run: |
+          kubectl cluster-info || echo "Failed to connect to the Kubernetes API server"
+
+      # Step 9: Check kubectl version to confirm it's working
+      - name: Verify kubectl version
+        run: kubectl version --client
+
+      # Step 10: Get the nodes in the cluster (to confirm cluster health)
+      - name: List cluster nodes
+        run: kubectl get nodes || echo "Failed to get nodes in the cluster"
+
+      # Step 11: List available deployments in the default namespace (confirm deployment access)
+      - name: List deployments
+        run: kubectl get deployments || echo "Failed to get deployments"
+
+      # Step 12: Check Kubernetes namespaces (optional check to confirm permissions)
+      - name: List namespaces
+        run: kubectl get namespaces || echo "Failed to get namespaces"
+
+      # Step 13: Deploy to Kubernetes
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f deployment.yaml || echo "Failed to apply deployment.yaml"
 
 
 
