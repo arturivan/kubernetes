@@ -15,7 +15,7 @@ jobs:
       - name: Set up Tailscale
         run: |
           curl -fsSL https://tailscale.com/install.sh | sh
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --accept-routes --advertise-tags=tag:github-actions
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }}
 
       - name: Set up kubeconfig
         run: |
