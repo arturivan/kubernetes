@@ -1,4 +1,4 @@
-name: Deploy to RKE2 Cluster k8s
+name: Deploy to RKE2
 
 on:
   push:
@@ -8,36 +8,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Install Tailscale
-      run: |
-        curl -fsSL https://tailscale.com/install.sh | sh
-        sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }}
+      - name: Set up Tailscale
+        run: |
+          curl -fsSL https://tailscale.com/install.sh | sh
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --accept-routes --advertise-tags=tag:github-actions
 
-    - name: Set up SSH key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+      - name: Set up kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
 
-    - name: Add SSH to known hosts
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan -t rsa 100.127.34.10 >> ~/.ssh/known_hosts || echo "SSH keyscan failed, but continuing"
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
 
-    - name: List repository contents for debugging
-      run: |
-        ls -la
+      - name: Deploy to RKE2
+        run: kubectl apply -f deployment.yaml
 
-    - name: SSH into the VM and apply deployment
-      run: |
-        ssh -o StrictHostKeyChecking=no admink8s@100.127.34.10 << 'EOF'
-          kubectl apply -f deployment.yaml || echo "Failed to apply deployment.yaml"
-        EOF
 
 
 
