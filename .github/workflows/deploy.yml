@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,6 +35,14 @@ jobs:
       # Step 6: Push Docker Image to Azure Container Registry
       - name: Push Docker Image
         run: docker push $IMAGE_NAME
+
+  deploy:
+     needs: build
+     runs-on: ubuntu-latest
+     steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       # Step 7: Setup Tailscale for private Kubernetes access
       - name: Setup Tailscale
@@ -68,5 +76,5 @@ jobs:
       # Step 12: Deploy to Kubernetes
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f spark-app.yaml || echo "Failed to apply deployment.yaml"
+          kubectl apply -f spark-app.yaml || echo "Failed to apply spark-app.yaml"
 
