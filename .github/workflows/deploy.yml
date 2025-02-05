@@ -1,9 +1,16 @@
-name: Kubeflow Spark Pipeline 
+name: Kubeflow Spark Pipeline
 
 on:
   push:
     branches:
       - main
+    paths-ignore:
+      - "images/**" # Exclude changes in the images directory
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - "images/**" # Exclude changes in the images directory
 
 jobs:
   build:
@@ -37,10 +44,9 @@ jobs:
         run: docker push $IMAGE_NAME
 
   deploy:
-     needs: build
-     runs-on: ubuntu-latest
-     steps:
-
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -77,4 +83,3 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f spark-app.yaml || echo "Failed to apply spark-app.yaml"
-
