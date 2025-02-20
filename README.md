@@ -16,11 +16,11 @@ Grafana Cloud and Lens – Monitoring
 
 Key Highlights:
 
-Automated Spark job deployments using the Kubeflow Spark Operator
-Integrated GitHub Actions for secure and efficient CI/CD workflows
-Used Azure Container Registry for managing and securing container images
-Stored transformed data in Azure Storage for scalability and accessibility
-Configured Azure Files for backup of the Kubernetes cluster
-Used Tailscale for secure remote access to the cluster
-Implemented IAM integration and security best practices with Grafana Cloud and Azure Entra ID
-Designed for scalability, allowing efficient Spark job execution on Kubernetes
+- Automated Spark job deployments using the Kubeflow Spark Operator
+- Integrated GitHub Actions for secure and efficient CI/CD workflows
+- Used Azure Container Registry for managing and securing container images
+- Stored transformed data in Azure Storage for scalability and accessibility
+- Configured Azure Files for backup of the Kubernetes cluster
+- Used Tailscale for secure remote access to the cluster
+- Implemented IAM integration and security best practices with Grafana Cloud and Azure Entra ID
+- Designed for scalability, allowing efficient Spark job execution on Kubernetes
