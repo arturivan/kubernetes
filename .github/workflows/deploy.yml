@@ -11,6 +11,7 @@ on:
       - main
     paths-ignore:
       - "images/**" # Exclude changes in the images directory
+      - "bicep/**" # this as well
 
 jobs:
   build:
